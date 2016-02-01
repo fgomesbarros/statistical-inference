@@ -1,0 +1,112 @@
+---
+title: "Statistical Inference Course Project - Part One"
+author: "Fabio Barros"
+date: "January, 2016"
+output: pdf_document
+---
+
+# Overview
+
+
+# Variables 
+First of all, let's set the variables used in this simulation.
+```{r}
+# Number of simulations
+n.sims <- 2000
+
+# Rate parameter
+lambda <- 0.2
+
+# Vector of samples
+exp.sample <- NULL
+
+# Size of samples
+n.sample <- 40
+
+# Vector of x bar values
+x.bar <- NULL
+```
+
+# Theoretical values
+
+Let's calculate the theoretical values
+```{r}
+# Calculates the mean of x bar values 
+mean.x.bar <- 1 / lambda
+print(mean.x.bar)
+
+# Standard deviation of x bar values
+s.x.bar <- (1 / lambda) * (1 / sqrt(n.sample))
+print(s.x.bar)
+
+# Variance of x bar values
+var.x.bar <- s.x.bar ^ 2
+print(var.x.bar)
+```
+$E[\overline{X}] = \frac {1}{\lambda} = \frac {1}{0.2} = `r mean.x.bar`$
+
+$s = \frac{\sigma}{\sqrt{n}} = \frac {1}{\lambda} \times \frac {1}{\sqrt{n}} = \frac {1}{0.2} \times \frac {1}{\sqrt{40}} = `r s.x.bar`$
+
+$Var[\overline{X}] = s^ 2 = `r s.x.bar` ^ 2 = `r var.x.bar`$
+
+# Simulations
+```{r}
+# Sets seed
+set.seed(55)
+
+# Generates 20K simulations of 40 samples
+for (i in 1:n.sims) {
+  # Generates the exponential sample 
+  exp.sample <- rexp(n = n.sample, rate = lambda)
+  # Creates the distribution of x bar values
+  x.bar <- c(x.bar , mean(exp.sample))
+}
+```
+
+# Sample Mean versus Theoretical Mean
+
+```{r}
+# Calculate the cumulative means
+acc.mean <- cumsum(x.bar)
+for (i in 1:n.sims) {
+  acc.mean[i] <- acc.mean[i] / i   
+}
+
+# Plot the cumulative means
+plot(acc.mean, type = "l", col = "blue", xlab = "Simulations", 
+     ylab = "Mean of sample means")
+abline(h = mean.x.bar, col = "red", lwd = 2, lty = 2)
+
+print(mean.x.bar)
+print(mean(x.bar))
+print(mean.x.bar - mean(x.bar))
+```
+
+# Sample Variance versus Theoretical Variance
+
+```{r}
+# Calculate the cumulative variances
+acc.var <- NULL
+for (i in 1:n.sims) {
+  acc.var[i] <- var(x.bar[1:i])
+  }
+
+# Plot the cumulative variances
+plot(acc.var, type = "l", col = "darkgreen", xlab = "Simulations", 
+     ylab = "Variance of sample means")
+abline(h = var.x.bar, col = "red", lwd = 2, lty = 2)
+
+print(var.x.bar)
+print(var(x.bar))
+print(var.x.bar - var(x.bar))
+```
+
+# Distribution
+```{r}
+hist(x.bar, breaks = 50, probability = TRUE, col = "lightblue",
+     main = "Distribution of averages of samples with lambda = 0.2", 
+     xlab = "")
+lines(density(x.bar), col = "blue", lwd = 2)
+abline(v = mean(x.bar), col = "red", lwd = 2)
+```
+
